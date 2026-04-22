@@ -1,0 +1,9 @@
+## Interface: 30300
+## Title: MonkeySpeed Standalone v1.0
+## Notes: Adds a simple movable speedometer displaying speed as a percentage of run speed.
+## Author: Meesha
+## Version: 1.0
+## SavedVariables: MonkeySpeedConfig
+# Original Author: Trentin (trentin@toctastic.net), Website: http://toctastic.net/
+
+MonkeySpeed-SA.xml
