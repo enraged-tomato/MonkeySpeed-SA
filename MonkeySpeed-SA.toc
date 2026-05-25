@@ -4,6 +4,8 @@
 ## Author: Meesha
 ## Version: 1.0
 ## SavedVariables: MonkeySpeedConfig
+## OptionalDeps: Titan
 # Original Author: Trentin (trentin@toctastic.net), Website: http://toctastic.net/
 
 MonkeySpeed-SA.xml
+MonkeySpeedTitan.lua
