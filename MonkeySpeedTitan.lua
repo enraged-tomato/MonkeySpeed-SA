@@ -6,7 +6,7 @@
 if not TitanPanelButton_OnLoad or not TitanUtils_GetButton then return end
 
 local TITAN_ID        = "MonkeySpeed"
-local UPDATE_INTERVAL = 0.2
+local UPDATE_INTERVAL = 0.1
 
 local function GetSpeedColor(spd)
 	if spd == nil then
@@ -95,9 +95,21 @@ function TitanPanelMonkeySpeedButton_GetTooltipText()
 end
 
 -- **************************************************************************
--- OnUpdate: throttle Titan refresh
+-- OnUpdate: doubles as a fallback driver for MonkeySpeed's update loop.
+--
+-- MonkeySpeed.m_fSpeed is normally maintained by MonkeySpeedFrame's own
+-- OnUpdate handler. When the bar is hidden that handler stops firing, so we
+-- step in here — but ONLY while the bar is hidden, to avoid double-ticking
+-- m_iDeltaTime when both drivers are live. When neither the bar nor the
+-- Titan widget is shown, no ticks happen at all (this OnUpdate doesn't fire
+-- while its host button is hidden), so the speed calc costs zero CPU.
 -- **************************************************************************
 function TitanPanelMonkeySpeedButton_OnUpdate(self, elapsed)
+	if MonkeySpeedFrame and not MonkeySpeedFrame:IsShown()
+	   and MonkeySpeed_OnUpdate and MonkeySpeedLoaded() then
+		MonkeySpeed_OnUpdate(MonkeySpeedFrame, elapsed)
+	end
+
 	self.elapsed = (self.elapsed or 0) + elapsed
 	if self.elapsed >= UPDATE_INTERVAL then
 		self.elapsed = 0
@@ -114,9 +126,6 @@ function TitanPanelRightClickMenu_PrepareMonkeySpeedMenu()
 		TitanPanelRightClickMenu_AddSpacer()
 		TitanPanelRightClickMenu_AddCommand("Calibrate", TITAN_ID, "TitanPanelMonkeySpeedButton_Calibrate")
 
-		-- Custom toggle: AddToggleVar's 4th param is a "related vars" table for
-		-- the all-off check, NOT a callback. Build the entry by hand so we can
-		-- run our own sync after the flip.
 		local info = {}
 		info.text             = "Show MonkeySpeed Bar"
 		info.checked          = TitanGetVar(TITAN_ID, "ShowMonkeyBar")
@@ -148,28 +157,12 @@ function TitanPanelMonkeySpeedButton_ToggleBar()
 	if MonkeySpeedConfig then
 		MonkeySpeedConfig.m_bDisplay = show and true or false
 	end
-	-- Safe to truly Hide() now: the OnUpdate that maintains MonkeySpeed.m_fSpeed
-	-- runs on a separate driver frame (see bottom of file), independent of
-	-- MonkeySpeedFrame's visibility.
+
 	if MonkeySpeedFrame then
 		if show then MonkeySpeedFrame:Show() else MonkeySpeedFrame:Hide() end
 	end
 end
 
--- **************************************************************************
--- Create the plugin button programmatically (no XML required).
--- We must:
---   1) Create the button inheriting TitanPanelComboTemplate
---   2) Explicitly create the $parentRightClickMenu child frame — Titan's
---      right-click handler looks it up by name via _G; template child
---      frames are not always materialised when inherited from Lua.
---   3) Call our OnLoad (assigns self.registry) BEFORE TitanPanelButton_OnLoad
---      (queues registration which reads self.registry).
--- **************************************************************************
--- Parent the button to an *unnamed* wrapper frame, mirroring TitanSpeed.xml's
--- structure. Titan's TitanUtils_GetButtonIDFromMenu walks menu->button->parent;
--- if the button's parent has a name, it mis-identifies the plugin as a child
--- button and right-click silently fails to find the menu prepare function.
 local parentFrame = CreateFrame("Frame", nil, UIParent)
 local btn = CreateFrame("Button", "TitanPanelMonkeySpeedButton", parentFrame, "TitanPanelComboTemplate")
 btn:SetFrameStrata("FULLSCREEN")
@@ -192,23 +185,3 @@ btn:SetScript("OnLeave",  function(self) TitanPanelButton_OnLeave(self) end)
 -- self.registry before Titan processes the queue (at PLAYER_LOGIN).
 TitanPanelMonkeySpeedButton_OnLoad(btn)
 
--- **************************************************************************
--- Decouple MonkeySpeed's update loop from MonkeySpeedFrame's visibility.
---
--- MonkeySpeed.m_fSpeed is recalculated in MonkeySpeed_OnUpdate (see
--- MonkeySpeed.lua). That handler was originally wired to MonkeySpeedFrame
--- itself, which means hiding the bar would stop the update loop and freeze
--- the Titan readout. We route the tick through a dedicated, always-shown,
--- invisible Frame parented to UIParent instead. The original handler on
--- MonkeySpeedFrame is cleared to avoid double-ticking the delta-time.
--- **************************************************************************
-local driver = CreateFrame("Frame", nil, UIParent)
-driver:SetScript("OnUpdate", function(_, elapsed)
-	if MonkeySpeedFrame and MonkeySpeed_OnUpdate then
-		MonkeySpeed_OnUpdate(MonkeySpeedFrame, elapsed)
-	end
-end)
-
-if MonkeySpeedFrame then
-	MonkeySpeedFrame:SetScript("OnUpdate", nil)
-end
