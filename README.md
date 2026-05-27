@@ -2,7 +2,7 @@
 
 A lightweight speedometer addon for World of Warcraft 3.3.5a. Shows your current movement speed as a percentage of the zone's normal run speed, along with a colored bar that changes color as you move faster.
 
-This is the **standalone** build — it has no dependency on `MonkeyLibrary` or `MonkeyBuddy`. Everything needed to run is in this folder.
+This is a **standalone** build — it has no dependency on `MonkeyLibrary` or `MonkeyBuddy`. 
 
 **Original Author**: Trentin (trentin@toctastic.net), Website: http://toctastic.net/
 
@@ -28,6 +28,7 @@ This is the **standalone** build — it has no dependency on `MonkeyLibrary` or 
        MonkeySpeed.lua
        MonkeySpeedInit.lua
        MonkeySpeedSlash.lua
+       MonkeySpeedTitan.lua
        localization.lua
        Fonts\myriapsc.ttf
        Textures\bar.tga
@@ -111,6 +112,30 @@ Tune the window size with `/mssensitivity N`:
 - `10`–`30` — steadier but slower to react to real speed changes (mount up, speed buff, etc.).
 
 Running `/mssensitivity` with no argument prints the current value. The chosen value is saved across sessions.
+
+---
+
+## Titan Panel integration
+
+If **Titan Panel** is installed and enabled, MonkeySpeed automatically registers a plugin that displays your current speed on the Titan bar. The integration is purely additive — if Titan is not present, nothing extra happens and the rest of MonkeySpeed works exactly the same.
+
+### Enabling
+
+After logging in with both addons loaded:
+
+1. Right-click any empty area of the Titan bar (or use `/titanpanel`).
+2. Find **MonkeySpeed** under the **Information** category and enable it.
+
+The widget shows `MonkeySpeed: NN%` and reads the same speed value as the in-world bar (post-calibration, post-sliding-window). The percentage text uses the same color scheme as the on-screen bar, with the purple and blue shades brightened slightly for readability against Titan's dark background.
+
+### Right-click menu
+
+| Option | Effect |
+|---|---|
+| **Calibrate** | Same as `/mscalibrate` — recalibrates the current zone with the default 10-sample window. |
+| **Show MonkeySpeed Bar** | Toggle the in-world MonkeySpeed frame on/off without affecting the Titan widget. State persists across reloads (same `MonkeySpeedConfig.m_bDisplay` flag as `/msdisplay`). |
+| **Show Label Text** | Standard Titan toggle — hides the `MonkeySpeed:` label, leaving just the colored percentage. |
+| **Hide** | Removes the plugin from the Titan bar. Re-enable it via `/titanpanel`. |
 
 ---
 
