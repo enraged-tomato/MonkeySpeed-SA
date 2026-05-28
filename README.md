@@ -10,6 +10,22 @@ This is a **standalone** build — it has no dependency on `MonkeyLibrary` or `M
 
 ---
 
+## Contents
+
+- [Installation](#installation)
+- [Using the addon](#using-the-addon)
+  - [The speedometer display](#the-speedometer-display)
+  - [Mouse controls](#mouse-controls)
+  - [Slash commands](#slash-commands)
+  - [Calibration](#calibration)
+  - [Stability filter](#stability-filter)
+- [Titan Panel integration](#titan-panel-integration)
+  - [Enabling](#enabling)
+  - [Right-click menu](#right-click-menu)
+- [Saved settings](#saved-settings)
+
+---
+
 ## Installation
 
 1. Close World of Warcraft completely.
